@@ -1,24 +1,32 @@
-<div id="loginModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-slate-800 border border-slate-700 p-8 rounded-[2rem] max-w-sm w-full text-center shadow-2xl">
-        <h2 class="text-2xl font-bold mb-6 text-white">Entrar no Soccer AI</h2>
+# Soccer AI Analytics - Motor de Detecção
+import cv2
+from ultralytics import YOLO
+
+# 1. Carregar o modelo de IA (YOLOv8 é o mais rápido para futebol)
+model = YOLO('yolov8n.pt') 
+
+def process_video(video_path):
+    # 2. Abrir o vídeo da partida
+    cap = cv2.VideoCapture(video_path)
+    
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+            
+        # 3. IA detectando jogadores (class 0) e bola (class 32)
+        results = model(frame, classes=[0, 32]) 
         
-        <button class="w-full bg-white text-black font-bold py-3 px-4 rounded-xl mb-3 flex items-center justify-center gap-2 hover:bg-slate-200 transition">
-            <i class="fab fa-google text-red-500"></i> Entrar com Google
-        </button>
+        # Aqui a IA desenha as caixas nos jogadores em tempo real
+        annotated_frame = results[0].plot()
+        
+        # Exibir o resultado (apenas se rodar no PC)
+        cv2.imshow("IA Soccer Analysis", annotated_frame)
+        
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
-        <button class="w-full bg-black text-white font-bold py-3 px-4 rounded-xl mb-3 flex items-center justify-center gap-2 hover:bg-slate-700 transition">
-            <i class="fab fa-tiktok"></i> Entrar com TikTok
-        </button>
+    cap.release()
+    cv2.destroyAllWindows()
 
-        <div class="text-slate-500 my-4 text-xs uppercase tracking-widest">ou</div>
-
-        <input type="email" placeholder="Seu e-mail" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 mb-3 text-white focus:border-emerald-500 outline-none">
-        <button onclick="fecharLogin()" class="w-full bg-emerald-500 text-white font-bold py-3 rounded-xl hover:bg-emerald-600 transition">Acessar com E-mail</button>
-    </div>
-</div>
-
-<script>
-    function fecharLogin() {
-        document.getElementById('loginModal').style.display = 'none';
-    }
-</script>
+print("Motor de IA configurado com sucesso!")
